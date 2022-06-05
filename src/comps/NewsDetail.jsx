@@ -25,7 +25,7 @@ export default class NewsDetail extends Component {
               <span>{new Date(publishedAt).toGMTString()}</span>
             </div>
 
-            <a href={newsUrl} class="btn btn-sm  btn-info bg-opacity-50"> Get More Details</a>
+            <a href={newsUrl} target="_blank" class="btn btn-sm  btn-info bg-opacity-50"> Get More Details</a>
           </div>
         </div>
 
