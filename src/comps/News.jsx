@@ -1,37 +1,26 @@
-import React, { Component } from 'react'
+
 import NewsDetail from './NewsDetail'
 import Spin from './Spin';
 import PropTypes from 'prop-types'
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-export default class News extends Component {
-  defaultProps = {
-    size: 6,
-    country: 'in',
-    category: "general"
+import React, { useEffect, useState } from 'react'
 
-  }
-  static propTypes = {
-    size: PropTypes.number,
-    country: PropTypes.string,
-    general: PropTypes.string
-  }
-  articles = []
-  constructor() {
-    super();
-    console.log("constructor from news component");
-    this.state = {
-      articles: this.articles,
-      page: 1,
-      totalResults: 0
+export default function News(props) {
 
-    }
-  }
+  const [articles, setArticles] = useState([])
+
+  const [loading, setLoading] = useState(true)
+
+  const [page, setpage] = useState(1)
+
+  const [totalResults, setTotalResults] = useState(0)
+
 
   // async handleUpdateNews() {
   //   window.scrollTo(0, 0);
   //   this.setState({ loading: true })
-  //   let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=23ed5c08583745348f06aace87b3db7b&page=${this.state.page}&pagesize=${this.props.size}`
+  //   let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=23ed5c08583745348f06aace87b3db7b&page=${this.state.page}&pagesize=${props.size}`
 
   //   let data = await fetch(url)
   //   let parsedData = await data.json()
@@ -43,23 +32,31 @@ export default class News extends Component {
   //   })
   // }
 
-  async componentDidMount() {
-    // console.log("cdm");
-    this.fetchMoreData()
-  }
+  // async componentDidMount() {
+  //   // console.log("cdm");
+  //   fetchMoreData()
+  // }
+  useEffect(() => {
+    fetchMoreData()
+  }, [])
+  const fetchMoreData = async () => {
 
-  fetchMoreData = async () => {
-    this.setState({ page: ++this.state.page })
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=23ed5c08583745348f06aace87b3db7b&page=${this.state.page}&pagesize=${this.props.size}`
+    // const apiKey = "23ed5c08583745348f06aace87b3db7b"
+    let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=23ed5c08583745348f06aace87b3db7b&page=${page}&pagesize=${props.size}`
 
     let data = await fetch(url)
     let parsedData = await data.json()
     console.log(parsedData);
-    this.setState({
-      articles: this.state.articles.concat(parsedData.articles),
-      totalResults: parsedData.totalResults, author: parsedData.author, publishedAt: parsedData.publishedAt,
-      loading: false
-    })
+    // this.setState({
+    //   articles: this.statearticles.concat(parsedData.articles),
+    //   totalResults: parsedData.totalResults, author: parsedData.author, publishedAt: parsedData.publishedAt,
+    //   loading: false
+    // })
+
+    setpage(page + 1)
+    setArticles(articles.concat(parsedData.articles))
+    setLoading(false)
+    setTotalResults(parsedData.totalResults)
 
   };
   // handlePreClick = async () => {
@@ -86,54 +83,70 @@ export default class News extends Component {
 
   // }
 
-  render() {
-    console.log("render");
-    return (
-      <div className='container '>
-        <h3 className='text-light '>Today's Headlines</h3>
-        {/* {this.state.loading && <Spin />} */}
 
 
-        <InfiniteScroll style={{overflow:"visible"}}
-          dataLength={this.state.articles.length}
-          next={this.fetchMoreData}
-          hasMore={this.state.articles.length !== this.state.totalResults}
-          loader={<Spin />}>
+  return (
+    <div className='container '>
+      <h3 className='text-light '>Today's Headlines</h3>
+      {/* {this.state.loading && <Spin />} */}
+
+
+      <InfiniteScroll style={{ overflow: "visible" }}
+        dataLength={articles.length}
+        next={fetchMoreData}
+        hasMore={articles.length !== totalResults}
+        loader={<Spin />}>
 
 
 
 
-          <div className="container">
+        <div className="container">
 
-            <div className="row my-3 text-dark">
-              {this.state.articles.map((element, key) => {
-                console.log(element);
+          <div className="row my-3 text-dark">
+            {articles.map((element, key) => {
+              console.log(element);
 
-                return (
+              return (
 
-                  <div className=" col-md-4">
+                <div className=" col-md-4">
 
-                    <NewsDetail key={element.url} title={element.title} source={element.source.name} desc={element.description} newsUrl={element.url} imageUrl={element.urlToImage} author={element.author} publishedAt={element.publishedAt} />
-                  </div>
-                )
-              })
-              }
+                  <NewsDetail key={element.url} title={element.title} source={element.source.name} desc={element.description} newsUrl={element.url} imageUrl={element.urlToImage} author={element.author} publishedAt={element.publishedAt} />
+                </div>
+              )
+            })
+            }
 
 
-            </div>
           </div>
-        </InfiniteScroll>
+        </div>
+      </InfiniteScroll>
 
-        {/* <div className="container d-flex justify-content-between">
+      {/* <div className="container d-flex justify-content-between">
 
-          <button type="button" disabled={this.state.page <= 1} onClick={this.handlePreClick} class="btn btn-dark  m-3  border border-info">Previous Page</button>
+        <button type="button" disabled={this.state.page <= 1} onClick={this.handlePreClick} class="btn btn-dark  m-3  border border-info">Previous Page</button>
 
-          <button type="button" disabled={this.state.page + 1 > Math.ceil(this.state.totalResults / this.props.size)} onClick={this.handleNextClick} class="btn btn-dark  m-3  border border-info">Next Page</button>
+        <button type="button" disabled={this.state.page + 1 > Math.ceil(this.state.totalResults / props.size)} onClick={this.handleNextClick} class="btn btn-dark  m-3  border border-info">Next Page</button>
 
 
 
-        </div> */}
-      </div>
-    )
-  }
+      </div> */}
+    </div>
+  )
+
+
+
+
+
+}
+
+News.defaultProps = {
+  size: 6,
+  country: 'in',
+  category: "general"
+
+}
+News.propTypes = {
+  size: PropTypes.number,
+  country: PropTypes.string,
+  general: PropTypes.string
 }
